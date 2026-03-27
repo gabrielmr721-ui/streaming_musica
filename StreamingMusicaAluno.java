@@ -1,35 +1,28 @@
 import java.util.ArrayList;
 import java.util.Scanner;
- 
- 
-/**
- * Sistema de Streaming de Música - CP1
- */
+
 public class StreamingMusicaAluno {
-    
-    static ArrayList<String> titulos = new ArrayList<>();
-    static ArrayList<String> artistas = new ArrayList<>();
-    static ArrayList<Integer> duracoes = new ArrayList<>();
-    static ArrayList<String> generos = new ArrayList<>();
-    
+
+    static ArrayList<Musica> musicas = new ArrayList<>();
+
     static final String[] GENEROS_VALIDOS = {"Pop", "Rock", "Jazz", "Eletrônica", "Hip-Hop", "Clássica", "Funk"};
-    
+
     static Scanner scanner = new Scanner(System.in);
-    
+
     public static void main(String[] args) {
         adicionarMusicasTeste();
-        
+
         int opcao;
         do {
             exibirMenu();
             opcao = lerOpcao();
             processarOpcao(opcao);
         } while (opcao != 0);
-        
+
         System.out.println("\n🎵 Obrigado por usar o Sistema de Streaming! Até logo! 🎵");
         scanner.close();
     }
-    
+
     public static void exibirMenu() {
         System.out.println("\n" + "=".repeat(50));
         System.out.println("🎵 SISTEMA DE STREAMING DE MÚSICA 🎵");
@@ -44,7 +37,7 @@ public class StreamingMusicaAluno {
         System.out.println("=".repeat(50));
         System.out.print("Escolha uma opção: ");
     }
-    
+
     public static int lerOpcao() {
         try {
             return Integer.parseInt(scanner.nextLine());
@@ -52,7 +45,7 @@ public class StreamingMusicaAluno {
             return -1;
         }
     }
-    
+
     public static void processarOpcao(int opcao) {
         switch (opcao) {
             case 1: cadastrarMusica(); break;
@@ -65,271 +58,252 @@ public class StreamingMusicaAluno {
             default: System.out.println("❌ Opção inválida! Tente novamente.");
         }
     }
-    
+
     public static void cadastrarMusica() {
         System.out.println("\n--- CADASTRAR MÚSICA ---");
-        
+
         System.out.print("Título: ");
         String titulo = scanner.nextLine().trim();
-        
+
         if (titulo.isEmpty()) {
             System.out.println("❌ Título não pode ser vazio!");
             return;
         }
-        
+
         System.out.print("Artista: ");
         String artista = scanner.nextLine().trim();
-        
+
         if (artista.isEmpty()) {
             System.out.println("❌ Artista não pode ser vazio!");
             return;
         }
-        
+
         System.out.print("Duração (em segundos): ");
         int duracao;
-        
+
         try {
             duracao = Integer.parseInt(scanner.nextLine());
         } catch (NumberFormatException e) {
             System.out.println("❌ Duração inválida!");
             return;
         }
-        
+
         if (duracao <= 0) {
             System.out.println("❌ Duração deve ser maior que 0!");
             return;
         }
-        
+
         System.out.println("\nGêneros disponíveis:");
-        
+
         for (int i = 0; i < GENEROS_VALIDOS.length; i++) {
             System.out.println((i + 1) + ". " + GENEROS_VALIDOS[i]);
         }
-        
+
         System.out.print("Escolha o gênero (1-" + GENEROS_VALIDOS.length + "): ");
-        
+
         int opcaoGenero;
-        
+
         try {
             opcaoGenero = Integer.parseInt(scanner.nextLine());
         } catch (NumberFormatException e) {
             System.out.println("❌ Opção inválida!");
             return;
         }
-        
+
         if (opcaoGenero < 1 || opcaoGenero > GENEROS_VALIDOS.length) {
             System.out.println("❌ Gênero inválido!");
             return;
         }
-        
+
         String genero = GENEROS_VALIDOS[opcaoGenero - 1];
-        
-        titulos.add(titulo);
-        artistas.add(artista);
-        duracoes.add(duracao);
-        generos.add(genero);
-        
+
+        Musica musica = new Musica(titulo, artista, duracao, genero);
+        musicas.add(musica);
+
         System.out.println("✅ Música cadastrada com sucesso!");
     }
-    
+
     public static void listarMusicas() {
         System.out.println("\n--- MÚSICAS CADASTRADAS ---");
-        
-        if (titulos.isEmpty()) {
+
+        if (musicas.isEmpty()) {
             System.out.println("Nenhuma música cadastrada ainda.");
             return;
         }
-        
-        for (int i = 0; i < titulos.size(); i++) {
+
+        for (int i = 0; i < musicas.size(); i++) {
+            Musica m = musicas.get(i);
+
             System.out.printf("%d. Título: %s | Artista: %s | Duração: %s | Gênero: %s%n",
                     (i + 1),
-                    titulos.get(i),
-                    artistas.get(i),
-                    formatarDuracao(duracoes.get(i)),
-                    generos.get(i));
+                    m.getTitulo(),
+                    m.getArtista(),
+                    m.formatarDuracao(),
+                    m.getGenero());
         }
-        
-        System.out.println("\nTotal: " + titulos.size() + " música(s)");
+
+        System.out.println("\nTotal: " + musicas.size() + " música(s)");
     }
-    
+
     public static void buscarPorTitulo() {
         System.out.println("\n--- BUSCAR POR TÍTULO ---");
-        
-        System.out.print("Digite o título (ou parte dele): ");
-        String busca = scanner.nextLine().trim().toLowerCase();
-        
+
+        System.out.print("Digite o título: ");
+        String busca = scanner.nextLine().toLowerCase();
+
         boolean encontrou = false;
-        
-        for (int i = 0; i < titulos.size(); i++) {
-            if (titulos.get(i).toLowerCase().contains(busca)) {
-                
+
+        for (Musica m : musicas) {
+            if (m.getTitulo().toLowerCase().contains(busca)) {
+
                 if (!encontrou) {
                     System.out.println("\nMúsicas encontradas:");
                     encontrou = true;
                 }
-                
+
                 System.out.printf("- %s | %s | %s | %s%n",
-                        titulos.get(i),
-                        artistas.get(i),
-                        formatarDuracao(duracoes.get(i)),
-                        generos.get(i));
+                        m.getTitulo(),
+                        m.getArtista(),
+                        m.formatarDuracao(),
+                        m.getGenero());
             }
         }
-        
+
         if (!encontrou) {
-            System.out.println("❌ Nenhuma música encontrada com esse título.");
+            System.out.println("❌ Nenhuma música encontrada.");
         }
     }
-    
+
     public static void buscarPorArtista() {
         System.out.println("\n--- BUSCAR POR ARTISTA ---");
-        
-        System.out.print("Digite o nome do artista (ou parte dele): ");
-        String busca = scanner.nextLine().trim().toLowerCase();
-        
+
+        System.out.print("Digite o artista: ");
+        String busca = scanner.nextLine().toLowerCase();
+
         boolean encontrou = false;
-        
-        for (int i = 0; i < artistas.size(); i++) {
-            if (artistas.get(i).toLowerCase().contains(busca)) {
-                
+
+        for (Musica m : musicas) {
+            if (m.getArtista().toLowerCase().contains(busca)) {
+
                 if (!encontrou) {
                     System.out.println("\nMúsicas encontradas:");
                     encontrou = true;
                 }
-                
+
                 System.out.printf("- %s | %s | %s | %s%n",
-                        titulos.get(i),
-                        artistas.get(i),
-                        formatarDuracao(duracoes.get(i)),
-                        generos.get(i));
+                        m.getTitulo(),
+                        m.getArtista(),
+                        m.formatarDuracao(),
+                        m.getGenero());
             }
         }
-        
+
         if (!encontrou) {
-            System.out.println("❌ Nenhuma música encontrada para esse artista.");
+            System.out.println("❌ Nenhuma música encontrada.");
         }
     }
-    
+
     public static void buscarPorGenero() {
         System.out.println("\n--- BUSCAR POR GÊNERO ---");
-        
-        System.out.println("Gêneros disponíveis:");
-        
+
         for (int i = 0; i < GENEROS_VALIDOS.length; i++) {
             System.out.println((i + 1) + ". " + GENEROS_VALIDOS[i]);
         }
-        
-        System.out.print("Escolha o gênero (1-" + GENEROS_VALIDOS.length + "): ");
-        
+
+        System.out.print("Escolha: ");
         int opcaoGenero;
-        
+
         try {
             opcaoGenero = Integer.parseInt(scanner.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("❌ Opção inválida!");
+        } catch (Exception e) {
+            System.out.println("❌ Inválido!");
             return;
         }
-        
+
         if (opcaoGenero < 1 || opcaoGenero > GENEROS_VALIDOS.length) {
-            System.out.println("❌ Gênero inválido!");
+            System.out.println("❌ Inválido!");
             return;
         }
-        
+
         String generoEscolhido = GENEROS_VALIDOS[opcaoGenero - 1];
-        
+
         boolean encontrou = false;
-        
-        for (int i = 0; i < generos.size(); i++) {
-            if (generos.get(i).equals(generoEscolhido)) {
-                
+
+        for (Musica m : musicas) {
+            if (m.getGenero().equals(generoEscolhido)) {
+
                 if (!encontrou) {
                     System.out.println("\nMúsicas encontradas:");
                     encontrou = true;
                 }
-                
+
                 System.out.printf("- %s | %s | %s | %s%n",
-                        titulos.get(i),
-                        artistas.get(i),
-                        formatarDuracao(duracoes.get(i)),
-                        generos.get(i));
+                        m.getTitulo(),
+                        m.getArtista(),
+                        m.formatarDuracao(),
+                        m.getGenero());
             }
         }
-        
+
         if (!encontrou) {
-            System.out.println("❌ Nenhuma música encontrada para esse gênero.");
+            System.out.println("❌ Nenhuma música encontrada.");
         }
     }
-    
+
     public static void exibirEstatisticas() {
         System.out.println("\n--- ESTATÍSTICAS DO SISTEMA ---");
-        
-        if (titulos.isEmpty()) {
+
+        if (musicas.isEmpty()) {
             System.out.println("Nenhuma música cadastrada ainda.");
             return;
         }
-        
-        int totalMusicas = titulos.size();
-        
+
+        int totalMusicas = musicas.size();
         int duracaoTotal = 0;
-        
-        for (int duracao : duracoes) {
-            duracaoTotal += duracao;
+
+        for (Musica m : musicas) {
+            duracaoTotal += m.getDuracao();
         }
-        
+
         int duracaoMedia = duracaoTotal / totalMusicas;
-        
-        String generoMais = generoMaisComum();
-        
+
         System.out.println("Total de músicas: " + totalMusicas);
         System.out.println("Duração total: " + formatarDuracao(duracaoTotal));
         System.out.println("Duração média: " + formatarDuracao(duracaoMedia));
-        System.out.println("Gênero mais cadastrado: " + generoMais);
+        System.out.println("Gênero mais cadastrado: " + generoMaisComum());
     }
-    
+
     public static String generoMaisComum() {
-        
         int[] contadores = new int[GENEROS_VALIDOS.length];
-        
-        for (String genero : generos) {
+
+        for (Musica m : musicas) {
             for (int i = 0; i < GENEROS_VALIDOS.length; i++) {
-                if (genero.equals(GENEROS_VALIDOS[i])) {
+                if (m.getGenero().equals(GENEROS_VALIDOS[i])) {
                     contadores[i]++;
-                    break;
                 }
             }
         }
-        
-        int indiceMaior = 0;
-        
+
+        int maior = 0;
+
         for (int i = 1; i < contadores.length; i++) {
-            if (contadores[i] > contadores[indiceMaior]) {
-                indiceMaior = i;
+            if (contadores[i] > contadores[maior]) {
+                maior = i;
             }
         }
-        
-        return GENEROS_VALIDOS[indiceMaior];
+
+        return GENEROS_VALIDOS[maior];
     }
-    
+
     public static String formatarDuracao(int segundos) {
         int minutos = segundos / 60;
         int segs = segundos % 60;
         return String.format("%d:%02d", minutos, segs);
     }
-    
+
     public static void adicionarMusicasTeste() {
-        titulos.add("Bohemian Rhapsody");
-        artistas.add("Queen");
-        duracoes.add(354);
-        generos.add("Rock");
-        
-        titulos.add("Billie Jean");
-        artistas.add("Michael Jackson");
-        duracoes.add(293);
-        generos.add("Pop");
-        
-        titulos.add("Smells Like Teen Spirit");
-        artistas.add("Nirvana");
-        duracoes.add(301);
-        generos.add("Rock");
+        musicas.add(new Musica("Bohemian Rhapsody", "Queen", 354, "Rock"));
+        musicas.add(new Musica("Billie Jean", "Michael Jackson", 293, "Pop"));
+        musicas.add(new Musica("Smells Like Teen Spirit", "Nirvana", 301, "Rock"));
     }
 }
